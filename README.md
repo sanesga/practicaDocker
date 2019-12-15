@@ -2,7 +2,7 @@
 
 **Enlace a github pages** 
 
-https://sanesga.github.io/practicaDocker.gihub.io/
+https://sanesga.github.io/practicaDocker/
 
 ***
 
