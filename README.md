@@ -432,6 +432,244 @@ path _/var/www/html_ del contenedor.
 
 ***
 
+ **CUARTA PARTE**
+
+Crear, por medio de un dockerfile, una imagen basada en una de Ubuntu en la que:
+
+1. Se instale un servidor apache.
+2. Se copie el fichero de configuración del sitio principal desde el contexto de docker(directorio donde se encuentra el dockerfile).
+3. En dicho fichero de configuración se establecerá una página de inicio (index.html) y otra de error (404.html) que se obtendrán también desde el contexto de docker.
+4. Al arrancar esta imagen en un contenedor se debe configurar un volumen que permita acceder a los logs de apache desde el host origen.
+
+0. DESCARGAR IMAGEN DE UBUNTU Y CREAR LOS DIRECTORIOS Y ARCHIVOS.
+
+  - Elegimos la versión bionic.
+
+   ```
+   sudo docker pull ubuntu:bionic
+   ```
+
+  ![imagen](./img/captura33.png)
+
+  - Verificamos:
+
+   ```
+   sudo docker images
+   ```
+
+   ![imagen](./img/captura34.png)
+
+ - Creamos un directorio donde alojaremos nuestros archivos (páginas html, archivo de configuración de apache y dockerfile):
+
+    ```
+    cd /home/sandra/Escritorio
+    ```
+
+    ```
+    sudo mkdir ejercicioDocker
+    ```
+
+  - Damos permisos:
+
+    ```
+    sudo chmod 777 ejercicioDocker
+    ```
+
+***
+
+2. COPIAR EL FICHERO DE CONFIGURACIÓN DEL SITIO PRINCIPAL DESDE EL CONTEXTO DE DOCKER (DIRECTORIO DONDE SE ENCUENTRA EL DOCKERFILE).
+
+  - Creamos una copia del archivo de configuración default de apache, en nuestro directorio:
+
+    - Vamos a la ruta de nuestro equipo donde tenemos tal archivo:
+
+    ```
+    cd /etc/apache2/sites-available
+    ```
+
+    - Copiamos el archivo de configuración a nuestro directorio:
+
+    ```
+    cp 000-default.conf /home/sandra/Escritorio/ejercicioDocker/
+    ```
+
+    - Para copiar este archivo en el apache de nuestro contenedor docker, lo haremos más adelante mediante la orden COPY.
+
+***
+
+3. ESTABLECER EN EL FICHERO DE CONFIGURACIÓN, UNA PÁGINA DE INICIO (index.html) Y OTRA DE ERROR (404.html) QUE SE OBTENDRÁN TAMBIÉN DESDE EL CONTEXTO DE DOCKER.
+
+- Modificamos el fichero de configuración para añadir las páginas:
+
+    ```
+    cd /home/sandra/Escritorio/ejercicioDocker
+    ```
+    ```
+    sudo vim 000-default-conf
+    ```
+
+    ![imagen](./img/captura36.png)
+
+
+  Directivas:
+
+    - El puerto por el que se sirve el sitio por defecto, es el 80.
+    - ServerName: Lo descomentamos, cambiándolo a localhost.
+    - DocumentRoot: Lo dejamos tal y como está, porque queremos que los archivos html los coja de la ruta /var/wwww/html (si no existe, se creará).
+    - ErrorDocument: Para el error 404, cogerá el archivo 404.html, que estará ubicado en la ruta especificada en DocumentRoot.
+    - El resto de directivas las dejamos igual.
+
+- Creamos los archivos index.html y 404.html en nuestro directorio:
+
+    ```
+    cd /home/sandra/Escritorio/ejercicioDocker
+    ```
+
+    ```
+    sudo touch index.html
+    ```
+
+    ```
+    sudo vim index.html
+    ```
+
+    ![imagen](./img/captura37.png)
+
+    ```
+    sudo touch 404.html
+    ```
+
+    ```
+    sudo vim 404.html
+    ```
+
+   ![imagen](./img/captura38.png)
+
+***
+
+4. AL ARRANCAR ESTA IMAGEN EN UN CONTENEDOR, SE DEBE CONFIGURAR UN VOLUMEN QUE PERMITA ACCEDER A LOS LOGS DE APACHE DESDE EL HOST ORIGEN
+
+- Utilizaremos un **mounted volume**. Los mounted volumes permiten montar ficheros o carpetas especificando la ruta del host y la del contenedor.
+
+- Los logs de apache, por defecto, se guardan en la carpeta /var/log/apache2/access.log.
+
+- Como queremos que se guarden en la carpeta de nuestro ejercicio, realizamos lo siguiente:
+
+  - Creamos una carpeta dentro de nuestro directorio llamada logs
+
+   ```
+   cd /home/sandra/Escritorio/ejercicioDocker
+   ```
+
+   ```
+   sudo mkdir logs
+   ```
+
+   - Agregaremos el siguiente comando al comando de ejecución del contenedor (la primera ruta es la local y la segunda la del contenedor):
+
+     -v /home/sandra/Escritorio/ejercicioDocker/logs:/var/log/apache2
+
+- Cuando ejecutemos el contendor más adelante, verificaremos que podemos acceder a los logs desde la carpeta logs de nuestro ejercicio.
+
+1. INSTALAR UN SERVIDOR APACHE.
+
+- Creamos el dockerfile:
+
+   ```
+   sudo touch dockerfile
+   ```
+
+   ```
+   sudo vim dockerfile
+   ```
+
+  ![imagen](./img/captura35.png)
+
+
+- Creamos la imagen a partir del dockerfile:
+
+   ```
+   sudo docker build -t ubuntu-image:v.1 .
+   ```
+
+   - -t : Damos nombre y tag a la imagen que se creará.
+   - . : Podemos utilizar sólo un punto, si nuestro dockerfile se denomina dockerfile.
+
+   ```
+   sudo docker images
+   ```
+
+   ![imagen](./img/captura39.png)
+
+- Una vez creada la imagen, creamos y ejecutamos el contenedor:
+ 
+   ```
+   sudo docker run -d -p 80:80 --name ubuntu-container -v /home/sandra/Escritorio/ejercicioDocker/logs:/var/log/apache2 ubuntu-image:v.1
+   ```
+
+  - -d: Para que se ejecute en segundo plano (Deatached Mode).
+  - -p: El contenedor funcionará a través del puerto 80.
+  - --name: Le damos un nombre al contenedor que se va a crear.
+  - ubuntu-image:v.1: Nombre y tag de la imagen que vamos a utilizar.
+  - -v: Indicamos las rutas del mounted volume (explicado en el punto anterior).
+
+   ```
+   sudo docker ps
+   ```
+
+  ![imagen](./img/captura40.png)
+
+
+- Para verificar que funciona, vamos al navegador, a localhost:80
+
+  ![imagen](./img/captura41.png)
+
+
+- Para visualizar el error 404, especificamos una ruta que no existe (localhost:80/imagenes):
+
+  ![imagen](./img/captura42.png)
+
+- Verificamos que podemos acceder a los logs desde local:
+
+   ```
+   cd /home/sandra/Escritorio/ejercicioDocker/logs
+   ```
+
+   ```
+   ls
+   ```
+   ![imagen](./img/captura43.png)
+
+   Observamos que tenemos los 3 archivos de logs de apache, si visualizamos el archivo access.log, podremos ver los logs:
+
+   ```
+    cat access.log
+   ```
+
+    ![imagen](./img/captura44.png)
+
+***
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
