@@ -23,11 +23,11 @@ https://sanesga.github.io/practicaDocker/
 ***
 **Objetivos de la práctica**
 
-Aprender a utilizar Docker;
+Aprender a utilizar Docker:
 
   1. Aprender a crear, ejecutar, iniciar y parar contenedores, a través de un archivo de configuración (dockerfile) y sin él.
   2. Aprender a crear y utilizar redes y volúmenes.
-  3. Utilizando únicamente la terminal de Linux.
+  3. Aprender a manejar Docker utilizando únicamente la terminal de Linux.
 
 ***
 
@@ -42,6 +42,7 @@ Crear un contenedor con una imagen de _MySQL_ y las siguientes características:
     - _MYSQL_DATABASE_: wordpress.
     - _MYSQL_USER_: wordpress.
     - _MYSQL_PASSWORD_: wordpress.
+
 
  3. Tener acceso a la red con el nombre _my_net_.
  4. Disponer de un _named data volumen_ denominado _vol_mysql_ asociado al path _/var/lib/mysql_ del contenedor.
@@ -114,6 +115,7 @@ Crear un contenedor con una imagen de _MySQL_ y las siguientes características:
   - bridge: Red que se asigna por defecto al contenedor.
   - host:  Permite utilizar la configuración de red de la máquina física que ejecuta el contenedor.
 
+
 - Procedemos a crear nuestra propia red y verificamos que está bien creada:
 
   ```
@@ -146,47 +148,47 @@ Crear un contenedor con una imagen de _MySQL_ y las siguientes características:
 
 **4. DISPONER DE UN _NAMED DATA VOLUMEN_ DENOMINADO _VOL_MYSQL_ ASOCIADO AL PATH _/var/lib/mysql_ DEL CONTENEDOR.**
 
-- Creamos un **_named data volumen_**. Un _named data volumen_ es un tipo de volumen que no depende de ningún contenedor, por lo que se puede montar en cualquiera de ellos. Hay dos formas de crear volúmenes, al mismo tiempo que ejecutamos el contenedor, o antes. En este caso, elegimos crearlo primero y asignarlo más tarde cuando ejecutamos nuestro contenedor.
+Creamos un **_named data volumen_**. Un _named data volumen_ es un tipo de volumen que no depende de ningún contenedor, por lo que se puede montar en cualquiera de ellos. Hay dos formas de crear volúmenes, al mismo tiempo que ejecutamos el contenedor, o antes. En este caso, elegimos crearlo primero y asignarlo más tarde cuando ejecutamos nuestro contenedor.
 
-  - Creamos el volumen:
+- Creamos el volumen:
 
-    ```
-    sudo docker volume create --name vol_mysql
-    ```
+  ```
+  sudo docker volume create --name vol_mysql
+  ```
 
-    ![imagen](./img/captura13.png)
+  ![imagen](./img/captura13.png)
 
-  - Verificamos que se ha creado correctamente:
+- Verificamos que se ha creado correctamente:
 
-    ```
-    sudo docker volume ls
-    ```
+  ```
+  sudo docker volume ls
+  ```
 
-    ![imagen](./img/captura22.png)
+  ![imagen](./img/captura22.png)
 
-  - Verificamos su configuración:
+- Verificamos su configuración:
 
-    ```
-    sudo docker volume inspect vol_mysql
-    ```
+  ```
+  sudo docker volume inspect vol_mysql
+  ```
 
-    ![imagen](./img/captura14.png)
+  ![imagen](./img/captura14.png)
 
 
-  - Para añadir el volumen a nuestro contenedor, asociándolo al path _/var/lib/mysql_ del contenedor, añadiremos el siguiente comando al arrancarlo:
+- Para añadir el volumen a nuestro contenedor, asociándolo al path _/var/lib/mysql_ del contenedor, añadiremos el siguiente comando al arrancarlo:
   
-    - -v vol_mysql:/var/lib/mysql (en la primera parte se especifica el nombre del volumen y en la segunda la ruta del contenedor donde queremos que se guarden los datos).
+  -v vol_mysql:/var/lib/mysql (en la primera parte se especifica el nombre del volumen y en la segunda la ruta del contenedor donde queremos que se guarden los datos).
 
 ***
 
  **1. y 2. SER ACCESIBLE A TRAVÉS DEL PUERTO 3306 Y DISPONER DE LAS SIGUIENTES VARIABLES DE ENTORNO:**
 
-    - _MYSQL_ROOT_PASSWORD_: 12345678.
-    - _MYSQL_DATABASE_: wordpress.
-    - _MYSQL_USER_: wordpress.
-    - _MYSQL_PASSWORD_: wordpress.
+  - _MYSQL_ROOT_PASSWORD_: 12345678.
+  - _MYSQL_DATABASE_: wordpress.
+  - _MYSQL_USER_: wordpress.
+  - _MYSQL_PASSWORD_: wordpress.
 
-- Procedemos a crear y ejecutar el contenedor con el siguiente comando:
+Procedemos a crear y ejecutar el contenedor con el siguiente comando:
 
   ```
   sudo docker run -d -p 3307:3306 --name mysql-db -e MYSQL_ROOT_PASSWORD="12345678" -e MYSQL_DATABASE="wordpress" -e MYSQL_USER="wordpress" -e MYSQL_PASSWORD="wordpress" --network="my_net" -v vol_mysql:/var/lib/mysql mysql:5.7
@@ -202,24 +204,25 @@ Crear un contenedor con una imagen de _MySQL_ y las siguientes características:
       - _MYSQL_USER_: wordpress --> Crea un usuario.
       - _MYSQL_PASSWORD_: wordpress --> Crea una contraseña para el usuario.
 
+
   - --network: Permite asignar al contenedor la red creada anteriormente.
   - -v : Permite asignar un volumen al contenedor, la parte izquierda es el nombre del volumen y la de la derecha la ruta donde se guardarán los archivos.
   - mysql:5.7: Es el nombre de la imagen que vamos a usar (si no nos hemos descargado la imagen en los pasos anteriores, se descargará automáticamente).
 
     ![imagen](./img/captura7.png)
 
-- Cuando ejecutamos el comando, se creará un contenedor que estára en marcha en segundo plano, verificamos que así sea:
+Cuando ejecutamos el comando, se creará un contenedor que estára en marcha en segundo plano, verificamos que así sea:
 
-  ```
-  sudo docker ps
-  ```
-  ![imagen](./img/captura8.png)
+```
+sudo docker ps
+```
+![imagen](./img/captura8.png)
 
-- Para verificar que mysql funciona, podemos entrar al contenedor con el siguiente comando:
+Para verificar que mysql funciona, podemos entrar al contenedor con el siguiente comando:
 
-  ```
-  sudo docker exec -it mysql-db mysql -p
-  ```
+```
+sudo docker exec -it mysql-db mysql -p
+```
 
   - exec: Indica que vamos a pasar un comando.
   - -it: Modo interactivo.
@@ -227,12 +230,12 @@ Crear un contenedor con una imagen de _MySQL_ y las siguientes características:
   - mysql -p: Comando para entrar en la consola de MySQL con el usuario root. 
 
 
-- Al ejecutar el comando, nos pide la contraseña del usuario root que hemos creado antes (12345678). Tras introducirla, accedemos a la consola de comandos y verificamos que se ha creado la base de datos y el usuario:
+Al ejecutar el comando, nos pide la contraseña del usuario root que hemos creado antes (12345678). Tras introducirla, accedemos a la consola de comandos y verificamos que se ha creado la base de datos y el usuario:
 
-  ![imagen](./img/captura10.png)
+![imagen](./img/captura10.png)
 
 
-- Una vez esté el contenedor creado y funcionando, podemos verificar si está conectado a la red que hemos creado y si tiene el volumen asociado:
+Una vez esté el contenedor creado y funcionando, podemos verificar si está conectado a la red que hemos creado y si tiene el volumen asociado:
 
   - Para ver la configuración del contendor:
 
@@ -257,6 +260,7 @@ Crear un contenedor con una imagen de _WordPress_ y las siguientes característi
     - _WORDPRESS_DB_HOST_: 127.0.0.1:3306.
     - _WORDPRESS_DB_USER_: wordpress.
     - _WORDPRESS_DB_PASSWORD_: wordpress.
+
 
  3. Tener acceso a la red con el nombre _my_net_.
  4. Disponer de un _named data volumen_ denominado _vol_wordpress_ asociado al
@@ -296,6 +300,8 @@ path _/var/www/html_ del contenedor.
 
  - Utilizaremos la red creada en el punto anterior, asignándola al crear el contenedor.
 
+***
+
 **4. DISPONSER DE UN _NAMED DATA VOLUME_ DENOMINADO _vol_wordpress_ ASOCIADO AL PATH _/var/www/html_  DEL CONTENEDOR.**
 
 - Creamos el volumen:
@@ -323,7 +329,9 @@ path _/var/www/html_ del contenedor.
 
   ![imagen](./img/captura21.png)
 
-- Lo asignaremos en la creación del cotenedor.
+- Lo asignaremos en la creación del contenedor.
+
+***
 
 **1. Y 2. SER ACCESIBLE A TRAVÉS DEL PUERTO 80 Y DISPONER DE LAS SIGUIENTES VARIABLES DE ENTORNO:**
 
@@ -388,6 +396,8 @@ Accedemos a la página localhost:80 y verificamos que funciona:
 
   Este punto lo hemos realizado en la primera y segunda parte del ejercicio.
 
+***
+
 **2. UNA VEZ ARRANCADOS, VERIFICAR QUE SE PUEDE REALIZAR EL PROCESO DE INSTALACIÓN DE WORDPRESS CORRECTAMENTE.**
 
   Tras elegir el idioma, al final de la parte 2, procedemos a instalar WordPress:
@@ -408,9 +418,13 @@ Accedemos a la página localhost:80 y verificamos que funciona:
 
   ![imagen](./img/captura29.png)
 
+***
+
 **3. VERIFICAR QUE SE PUEDE ACCEDER A MYSQL DESDE NUESTRO PC.**
 
    Este punto lo hemos realizado en la primera parte (punto 1 y 2) del ejercicio.
+
+***
 
 **4. COMPROBAR QUE SI SE DETIENEN Y SE VUELVEN A ARRANCAR AMBOS CONTENEDORES, NO ES NECESARIO VOLVER A REALIZAR LA INSTALACIÓN DE WORDPRESS OTRA VEZ.**
 
@@ -670,53 +684,3 @@ cat access.log
 ```
 
 ![imagen](./img/captura44.png)
-
-***
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
